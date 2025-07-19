@@ -2,62 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Guess the Number</title>
+  <title>تخمين الأرقام</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 2em; }
-    input, button { font-size: 1.2em; margin-top: 1em; }
+    body { font-family: Arial; margin: 30px; }
+    input { font-size: 18px; padding: 5px; }
+    button { padding: 5px 10px; }
+    #log { margin-top: 20px; font-size: 18px; white-space: pre-line; }
+    .correct { color: green; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1>لعبة تخمين الأرقام</h1>
-  <label>حدد عدد الخانات: <input type="number" id="digits" value="3" min="1"></label><br>
-  <button onclick="startGame()">إبدأ</button>
 
-  <div id="game" style="display:none;">
-    <p id="tries">عدد المحاولات: 0</p>
-    <input id="guess" placeholder="اكتب الرقم هنا ، أو كلمة خلاص لعرض الرقم"><br>
-    <button onclick="makeGuess()">خمن الرقم</button>
-    <p id="result"></p>
-  </div>
+<h2>لعبة تخمين الأرقام</h2>
 
-  <script>
-    let hidden = "", tries = 0;
+<label for="digits">عدد الخانات:</label>
+<input type="number" id="digits" min="1" value="3" />
+<button onclick="startGame()">إبدأ اللعب</button>
 
-    function startGame() {
-      const digits = parseInt(document.getElementById('digits').value);
-      const min = Math.pow(10, digits - 1);
-      const max = Math.pow(10, digits) - 1;
-      hidden = (Math.floor(Math.random() * (max - min + 1)) + min).toString();
-      tries = 0;
-      document.getElementById('game').style.display = 'block';
-      document.getElementById('result').textContent = '';
-      document.getElementById('tries').textContent = 'Tries: 0';
-      console.log("DEBUG: Hidden number is", hidden);  // Remove in final version
+<div id="gameArea" style="display:none; margin-top:20px;">
+  <input type="text" id="guessInput" placeholder="Enter your guess" />
+  <button onclick="submitGuess()">خمن الرقم</button>
+  <button onclick="showAnswer()">أظهر الإجابة</button>
+  <div id="log"></div>
+</div>
+
+<script>
+  let secret = "";
+  let digits = 3;
+  let log = [];
+  let tries = 0;
+
+  function startGame() {
+    digits = parseInt(document.getElementById('digits').value);
+    if (digits < 1) {
+      alert("Please enter a valid digit count.");
+      return;
     }
 
-    function makeGuess() {
-      const guessInput = document.getElementById('guess');
-      const guess = guessInput.value.padStart(hidden.length, '0');
-      if (guess.toLowerCase().endsWith("خلاص")) {
-        alert("الرقم الصحيح هو: " + hidden);
-        return;
-      }
+    // Generate random number with exact number of digits
+    const min = Math.pow(10, digits - 1);
+    const max = Math.pow(10, digits) - 1;
+    secret = Math.floor(Math.random() * (max - min + 1)) + min;
+    secret = String(secret);
 
-      tries++;
-      let correct = 0;
-      for (let i = 0; i < hidden.length; i++) {
-        if (guess[i] === hidden[i]) correct++;
-      }
+    log = [];
+    tries = 0;
+    document.getElementById("log").textContent = "";
+    document.getElementById("gameArea").style.display = "block";
+    document.getElementById("guessInput").value = "";
+    document.getElementById("guessInput").focus();
+  }
 
-      document.getElementById('tries').textContent = `عدد المحاولات: ${tries}`;
-      if (correct === hidden.length) {
-        document.getElementById('result').textContent = `✔ WELL DONE! ✔ The number is: ${hidden}`;
-      } else {
-        document.getElementById('result').textContent = `Correct digits in correct position: ${correct}`;
-      }
-
-      guessInput.value = "";
+  function submitGuess() {
+    const input = document.getElementById("guessInput").value.trim().padStart(digits, "0");
+    if (!/^\d+$/.test(input) || input.length !== digits) {
+      alert("Enter a " + digits + "-digit number.");
+      return;
     }
-  </script>
+
+    tries++;
+    let correct = 0;
+    for (let i = 0; i < digits; i++) {
+      if (input[i] === secret[i]) correct++;
+    }
+
+    const entry = `${input} [${correct} correct]`;
+    log.push(entry);
+    updateLog();
+
+    document.getElementById("guessInput").value = "";
+    document.getElementById("guessInput").focus();
+
+    if (correct === digits) {
+      alert(`✔ WELL DONE! The number is: ${secret} || TRIES: ${tries}`);
+    }
+  }
+
+  function updateLog() {
+    document.getElementById("log").textContent = log.join("\n");
+  }
+
+  function showAnswer() {
+    alert("The correct number was: " + secret);
+  }
+</script>
+
 </body>
 </html>
