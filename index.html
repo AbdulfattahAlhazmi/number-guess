@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Guess the Number</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2em; }
+    input, button { font-size: 1.2em; margin-top: 1em; }
+  </style>
+</head>
+<body>
+  <h1>لعبة تخمين الأرقام</h1>
+  <label>حدد عدد الخانات: <input type="number" id="digits" value="3" min="1"></label><br>
+  <button onclick="startGame()">إبدأ</button>
+
+  <div id="game" style="display:none;">
+    <p id="tries">عدد المحاولات: 0</p>
+    <input id="guess" placeholder="اكتب الرقم هنا ، أو كلمة خلاص لعرض الرقم"><br>
+    <button onclick="makeGuess()">خمن الرقم</button>
+    <p id="result"></p>
+  </div>
+
+  <script>
+    let hidden = "", tries = 0;
+
+    function startGame() {
+      const digits = parseInt(document.getElementById('digits').value);
+      const min = Math.pow(10, digits - 1);
+      const max = Math.pow(10, digits) - 1;
+      hidden = (Math.floor(Math.random() * (max - min + 1)) + min).toString();
+      tries = 0;
+      document.getElementById('game').style.display = 'block';
+      document.getElementById('result').textContent = '';
+      document.getElementById('tries').textContent = 'Tries: 0';
+      console.log("DEBUG: Hidden number is", hidden);  // Remove in final version
+    }
+
+    function makeGuess() {
+      const guessInput = document.getElementById('guess');
+      const guess = guessInput.value.padStart(hidden.length, '0');
+      if (guess.toLowerCase().endsWith("خلاص")) {
+        alert("الرقم الصحيح هو: " + hidden);
+        return;
+      }
+
+      tries++;
+      let correct = 0;
+      for (let i = 0; i < hidden.length; i++) {
+        if (guess[i] === hidden[i]) correct++;
+      }
+
+      document.getElementById('tries').textContent = `عدد المحاولات: ${tries}`;
+      if (correct === hidden.length) {
+        document.getElementById('result').textContent = `✔ WELL DONE! ✔ The number is: ${hidden}`;
+      } else {
+        document.getElementById('result').textContent = `Correct digits in correct position: ${correct}`;
+      }
+
+      guessInput.value = "";
+    }
+  </script>
+</body>
+</html>
